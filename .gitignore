@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+data/*.log
+
+# Frontend dependencies/build
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Env files
+.env
+.env.*
+
+# Misc caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+htmlcov/
