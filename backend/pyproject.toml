@@ -1,0 +1,18 @@
+[project]
+name = "gammaray-backend"
+version = "0.1.0"
+description = "FastAPI backend for gammaray project -- synthropy-dashboard"
+authors = [
+    {name = "dgmatica",email = "denisx1672@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.135.2,<0.136.0)",
+    "uvicorn (>=0.42.0,<0.43.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
