@@ -33,3 +33,7 @@ frontend/build/
 .ruff_cache/
 coverage/
 htmlcov/
+
+# Misc for sake of misc
+
+test1.py
