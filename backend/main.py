@@ -50,3 +50,46 @@ def get_failed_logs(
 ):
     logs, failed_logs = split_logs()
     return {"total": len(failed_logs), "data": failed_logs[-limit:]}
+
+
+def get_status_counts(logs):
+    status_counts = {}
+    for log in logs:
+        status = log.get("status")
+        if status is None:
+            status_counts["unknown"] = status_counts.get("unknown", 0) + 1
+            continue
+        if status in status_counts:
+            status_counts[status] += 1
+        else:
+            status_counts[status] = 1
+    return status_counts
+
+
+@app.get("/stats/status-codes")
+def status_counts():
+    logs, _ = split_logs()
+    return {"total": len(logs), "data": get_status_counts(logs)}
+
+
+def get_top_pages(logs):
+    path_counts = {}
+    for log in logs:
+        path = log.get("path")
+        if not path:
+            continue
+        path_counts[path] = path_counts.get(path, 0) + 1
+    page_count = []
+
+    for page, count in path_counts.items():
+        page_count.append({"path": page, "count": count})
+
+    return sorted(page_count, key=lambda entry: entry["count"], reverse=True)
+
+
+@app.get("/stats/top-pages")
+def top_pages(
+    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
+):
+    logs, _ = split_logs()
+    return {"total": len(logs), "data": get_top_pages(logs)[:limit]}
