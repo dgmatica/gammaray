@@ -196,3 +196,80 @@ def get_method_status_aggregation():
         "returned_items": len(data),
         "data": data,
     }
+
+
+def get_overview(logs, failed_logs):
+    total_valid_logs = len(logs)
+    total_failed_logs = len(failed_logs)
+
+    unique_paths_set = set()
+    durations = []
+    sizes = []
+
+    for log in logs:
+        path = log.get("path")
+        duration = log.get("duration")
+        size = log.get("size")
+
+        if path:
+            unique_paths_set.add(path)
+
+        if duration is not None:
+            durations.append(duration)
+
+        if size is not None:
+            sizes.append(size)
+
+    unique_paths = len(unique_paths_set)
+
+    status_counts = get_status_counts(logs)
+    top_status_code = None
+    if status_counts:
+        top_status, top_status_count = max(
+            status_counts.items(),
+            key=lambda item: item[1],
+        )
+        top_status_code = {
+            "status": top_status,
+            "count": top_status_count,
+        }
+
+    top_pages = get_top_pages(logs)
+    top_page = top_pages[0] if top_pages else None
+
+    method_status_data = get_method_status_counts(logs)
+    top_method_status = None
+    if method_status_data:
+        top_method_status = {
+            "method": method_status_data[0]["method"],
+            "status": method_status_data[0]["status"],
+            "count": method_status_data[0]["count"],
+        }
+
+    avg_duration = None
+    max_duration = None
+    if durations:
+        avg_duration = sum(durations) / len(durations)
+        max_duration = max(durations)
+
+    avg_size = None
+    if sizes:
+        avg_size = sum(sizes) / len(sizes)
+
+    return {
+        "total_valid_logs": total_valid_logs,
+        "total_failed_logs": total_failed_logs,
+        "unique_paths": unique_paths,
+        "top_status_code": top_status_code,
+        "top_page": top_page,
+        "top_method_status": top_method_status,
+        "avg_duration": avg_duration,
+        "max_duration": max_duration,
+        "avg_size": avg_size,
+    }
+
+
+@app.get("/stats/overview")
+def get_overview_stats():
+    logs, failed_logs = split_logs()
+    return get_overview(logs, failed_logs)
