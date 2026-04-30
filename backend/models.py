@@ -28,6 +28,7 @@ class AccessLog(SQLModel, table=True):
     user_agent: str | None = None
 
     raw_hash: str = Field(index=True, unique=True)
+    client_fingerprint: str | None = Field(default=None, index=True)
 
     imported_at: datetime = Field(default_factory=utc_now)
 
