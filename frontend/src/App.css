@@ -10,45 +10,96 @@ html,
 body,
 #root {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
 }
 
 body {
+  overflow: hidden;
   background: #0b0f14;
   color: #e8edf2;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .app {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2.5rem 1rem 4rem;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.app-header {
+  flex-shrink: 0;
 }
 
 .page-title {
-  margin: 0 0 1.5rem;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  margin: 0;
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem);
   font-weight: 800;
   letter-spacing: 0.04em;
   color: #f5f7fa;
 }
 
+.dashboard-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.panel {
+  min-width: 0;
+  min-height: 0;
+}
+
+.panel-overview {
+  grid-column: 1 / -1;
+  grid-row: 1 / 2;
+}
+
+.panel-method-status {
+  grid-column: 1 / 8;
+  grid-row: 2 / 5;
+}
+
+.panel-top-pages {
+  grid-column: 8 / 13;
+  grid-row: 2 / 3;
+}
+
+.panel-status-codes {
+  grid-column: 8 / 13;
+  grid-row: 3 / 4;
+}
+
+.panel-top-size {
+  grid-column: 8 / 13;
+  grid-row: 4 / 5;
+}
+
 .section {
-  margin-top: 1.25rem;
-  padding: 1.1rem;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.03);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(8px);
+  overflow: hidden;
 }
 
 .section-title {
   margin: 0 0 1rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #f3f6f9;
+  flex-shrink: 0;
 }
 
 .section-placeholder {
@@ -59,7 +110,7 @@ body {
 
 .overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.85rem;
 }
 
@@ -72,6 +123,7 @@ body {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
 }
 
 .overview-label {
@@ -82,7 +134,7 @@ body {
 
 .overview-value {
   margin-top: 0.8rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.35;
   font-weight: 700;
   color: #ffffff;
@@ -115,6 +167,47 @@ body {
   margin-top: 1rem;
 }
 
+.table-wrap {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  border-radius: 12px;
+  overscroll-behavior: contain;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.96rem;
+}
+
+.stats-table th,
+.stats-table td {
+  padding: 0.8rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stats-table th {
+  position: sticky;
+  top: 0;
+  background: #11161d;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #95a3b3;
+  z-index: 1;
+}
+
+.stats-table td {
+  color: #eef2f6;
+  vertical-align: top;
+}
+
+.stats-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 @keyframes skeleton-shimmer {
   0% {
     background-position: 200% 0;
@@ -122,5 +215,70 @@ body {
 
   100% {
     background-position: -200% 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    overflow: auto;
+  }
+
+  .panel-overview,
+  .panel-method-status,
+  .panel-top-pages,
+  .panel-status-codes,
+  .panel-top-size {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel-method-status .section {
+    height: clamp(360px, 65dvh, 560px);
+  }
+
+  .panel-top-pages .section,
+  .panel-status-codes .section,
+  .panel-top-size .section {
+    height: clamp(260px, 45dvh, 380px);
+  }
+}
+
+@media (max-width: 700px) {
+  body {
+    overflow: auto;
+  }
+
+  .app {
+    height: auto;
+    min-height: 100dvh;
+    padding: 0.75rem;
+  }
+
+  .dashboard-grid {
+    overflow: visible;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-method-status .section {
+    height: clamp(340px, 62dvh, 480px);
+  }
+
+  .panel-top-pages .section,
+  .panel-status-codes .section,
+  .panel-top-size .section {
+    height: clamp(240px, 42dvh, 330px);
+  }
+
+  .stats-table {
+    min-width: 620px;
   }
 }
