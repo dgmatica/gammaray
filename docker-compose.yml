@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:18.3
+    container_name: gammaray-postgres
+    environment:
+      POSTGRES_DB: gammaray
+      POSTGRES_USER: gammaray
+      POSTGRES_PASSWORD: gammaray
+    ports:
+      - "5433:5432"
+    volumes:
+      - gammaray_postgres_data:/var/lib/postgresql
+
+volumes:
+  gammaray_postgres_data:

@@ -8,5 +8,5 @@ LOG_PATH = PROJECT_DIR / "data" / "data" / "djangologs" / "access.log"
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+psycopg://gammaray:gammaray@localhost:5432/gammaray",
+    "postgresql+psycopg://gammaray:gammaray@localhost:5433/gammaray",
 )
