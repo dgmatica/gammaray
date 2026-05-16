@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
 
-from sqlmodel import Session, select
+from sqlalchemy.dialects.postgresql import insert
+from sqlmodel import Session
 
 from config import LOG_PATH
 from database import create_db_and_tables, engine
@@ -9,19 +10,41 @@ from log_parser import make_raw_hash, parse_log_line
 from models import AccessLog, FailedLog
 
 
-def raw_hash_exists(session: Session, raw_hash: str) -> bool:
-    access_log = session.exec(
-        select(AccessLog).where(AccessLog.raw_hash == raw_hash)
-    ).first()
+def insert_access_log(session: Session, parsed_data: dict) -> bool:
+    statement = (
+        insert(AccessLog)
+        .values(**parsed_data)
+        .on_conflict_do_nothing(index_elements=["raw_hash"])
+    )
 
-    if access_log is not None:
-        return True
+    result = session.execute(statement)
 
-    failed_log = session.exec(
-        select(FailedLog).where(FailedLog.raw_hash == raw_hash)
-    ).first()
+    return result.rowcount == 1
 
-    return failed_log is not None
+
+def insert_failed_log(
+    session: Session,
+    raw_line: str,
+    error: Exception,
+    line_number: int,
+    raw_hash: str,
+) -> bool:
+    failed_log_data = {
+        "raw_line": raw_line,
+        "error_message": str(error),
+        "line_number": line_number,
+        "raw_hash": raw_hash,
+    }
+
+    statement = (
+        insert(FailedLog)
+        .values(**failed_log_data)
+        .on_conflict_do_nothing(index_elements=["raw_hash"])
+    )
+
+    result = session.execute(statement)
+
+    return result.rowcount == 1
 
 
 def import_logs(log_path: Path = LOG_PATH) -> dict:
@@ -52,27 +75,28 @@ def import_logs(log_path: Path = LOG_PATH) -> dict:
 
                 seen_hashes.add(raw_hash)
 
-                if raw_hash_exists(session, raw_hash):
-                    skipped_count += 1
-                    continue
-
                 try:
                     parsed_data = parse_log_line(raw_line)
-                    access_log = AccessLog(**parsed_data)
+                    was_inserted = insert_access_log(session, parsed_data)
 
-                    session.add(access_log)
-                    imported_count += 1
+                    if was_inserted:
+                        imported_count += 1
+                    else:
+                        skipped_count += 1
 
                 except (json.JSONDecodeError, KeyError, ValueError, TypeError) as error:
-                    failed_log = FailedLog(
+                    was_inserted = insert_failed_log(
+                        session=session,
                         raw_line=raw_line,
-                        error_message=str(error),
+                        error=error,
                         line_number=line_number,
                         raw_hash=raw_hash,
                     )
 
-                    session.add(failed_log)
-                    failed_count += 1
+                    if was_inserted:
+                        failed_count += 1
+                    else:
+                        skipped_count += 1
 
         session.commit()
 
